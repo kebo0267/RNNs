@@ -8,7 +8,7 @@ An introduction to Recurrent Neural Networks (RNNs) for sequence modeling tasks.
 |----------|-------------|
 | [alphabet_rnn.ipynb](notebooks/alphabet_rnn.ipynb) | **Start here.** A gentle introduction to RNNs using a simple next-character prediction task. Learn how RNNs maintain hidden state to process sequences. |
 | [sentiment_analysis.ipynb](notebooks/sentiment_analysis.ipynb) | Full sentiment analysis pipeline on Twitter data. Covers tokenization, GloVe embeddings, Bidirectional GRU, and model evaluation with visualizations. |
-| [sentement_analysis_activity.ipynb](notebooks/sentement_analysis_activity.ipynb) | **Activity:** Extend the baseline GRU model by adding convolutional layers to create a CNN-RNN hybrid architecture. Compare performance against the baseline. |
+| [sentiment_analysis_activity.ipynb](notebooks/sentiment_analysis_activity.ipynb) | **Activity:** Extend the baseline GRU model by adding convolutional layers to create a CNN-RNN hybrid architecture. Compare performance against the baseline. |
 
 ## Getting started
 
