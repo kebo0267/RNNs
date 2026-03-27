@@ -234,11 +234,15 @@ class DataProcessing:
 
         return ret_value
     
-    def get_histogram_plot(self,features:list=None,target:str=None):
+    def get_histogram_plot(self,features:list=None,target:str=None,ignore:list=None):
         # Visualize
         if features is None:
             features = self.df.select_dtypes(include=[np.number]).columns.tolist()
             features.remove(self.target)
+            #Remove any features that are also in the ignore list
+            if ignore is not None:
+                features = [feature for feature in features if feature not in ignore]   
+                
             #Remove any features that have two or fewer unique values as these are likely to be binary features
             features = [feature for feature in features if len(self.df[feature].unique()) > 2]
         num_features = len(features)
@@ -254,19 +258,33 @@ class DataProcessing:
         plt.tight_layout()
         plt.show()
 
-    def get_scatter_plot(self,features:list,target:str=None):
+    def get_scatter_plot(self,features:list=None,target:str=None,ignore:list=None):
         # Visualize
-        features = self.df.select_dtypes(include=[np.number]).columns.tolist()
+
+        if features is None:
+            features = self.df.select_dtypes(include=[np.number]).columns.tolist()
+            features.remove(self.target)
+            #Remove any features that are also in the ignore list
+            if ignore is not None:
+                features = [feature for feature in features if feature not in ignore]   
         num_features = len(features)
         cols = 3
         # Calculate number of rows needed
         rows = (num_features // cols) + (num_features % cols > 0)
         
         plt.figure(figsize=(15, 5 * rows))
-        for i, feature in enumerate(features):
-            plt.subplot(rows, cols, i + 1)
-            sns.scatterplot(data=df[feature], kde=True, bins=30)
-            plt.title(f'Distribution of {feature}')
+
+        #Create a scatter plot of features vs the other features in the list with the hue set to the target variable if it is not None
+        if self.target is not None:
+            features2 = features.copy()
+            for i, feature in enumerate(features):
+                #Remove feture from features2 list so that it is not plotted against itself
+                features2.remove(feature)
+                for j, feature2 in enumerate(features2):
+                    plt.subplot(rows, cols, i + 1)
+                    sns.scatterplot(data=self.df, x=feature, y=feature2)
+                    plt.title(f'Distribution of {feature} vs {feature2}')        
+    
         plt.tight_layout()
         plt.show()
 

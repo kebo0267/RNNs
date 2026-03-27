@@ -3,3 +3,4 @@ logs
 models
 glove.twitter.27B.100d.txt
 data
+.venv
