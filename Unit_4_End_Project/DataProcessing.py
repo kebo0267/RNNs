@@ -117,16 +117,12 @@ class DataProcessing:
     
 
     def getMissingValues(self, columns:list):
-        missing_list = []
-        for col in columns:
-            if self.df[col].dtype != object:
-                missing_list.append(col)
+        missing_list = self.df.select_dtypes(include=[np.number]).columns.tolist()
         #imputer = KNNImputer(n_neighbors=2)
+        print(missing_list)
         imputer = SimpleImputer(strategy="mean")
-        df_num_only = self.df[missing_list].copy()
-        df_imputed = pd.DataFrame(imputer.fit_transform(df_num_only), columns=missing_list)
-        return df_imputed
-
+        self.df[missing_list] = imputer.fit_transform(self.df[missing_list])
+        
     def processNumericDataTypes(self):
         # Change data types to minimum required to represnt data
         if not self.df is None:
@@ -238,26 +234,39 @@ class DataProcessing:
 
         return ret_value
     
+    def get_histogram_plot(self,features:list=None,target:str=None):
+        # Visualize
+        if features is None:
+            features = self.df.select_dtypes(include=[np.number]).columns.tolist()
+            features.remove(self.target)
+            #Remove any features that have two or fewer unique values as these are likely to be binary features
+            features = [feature for feature in features if len(self.df[feature].unique()) > 2]
+        num_features = len(features)
+        cols = 3
+        # Calculate number of rows needed
+        rows = (num_features // cols) + (num_features % cols > 0)
+        
+        plt.figure(figsize=(15, 5 * rows))
+        for i, feature in enumerate(features):
+            plt.subplot(rows, cols, i + 1)
+            sns.histplot(self.df[feature], kde=True, bins=30)
+            plt.title(f'Distribution of {feature}')
+        plt.tight_layout()
+        plt.show()
+
     def get_scatter_plot(self,features:list,target:str=None):
         # Visualize
-        rows = len(features)//3 + 1
-        cols = len(features) % 3
+        features = self.df.select_dtypes(include=[np.number]).columns.tolist()
+        num_features = len(features)
+        cols = 3
+        # Calculate number of rows needed
+        rows = (num_features // cols) + (num_features % cols > 0)
         
-        if rows == 1 :
-            fig, axes = plt.subplots(cols, figsize=(8, 3))
-            for col in range(cols):
-                axes[col].scatter(self.df[features[col]], self.df[self.target] )
-                axes[col].set_xlabel(col)
-                axes[col].set_ylabel(self.target)
-
-        else:
-            fig, axes = plt.subplots(rows, cols, figsize=(8, 3))
-            for row in range(rows):
-                for col in range(cols):
-                    axes[row, col].scatter(self.df[features[col]], self.df[self.target] )
-                    axes[row, col].set_xlabel(col)
-                    axes[row, col].set_ylabel(self.target)
-
+        plt.figure(figsize=(15, 5 * rows))
+        for i, feature in enumerate(features):
+            plt.subplot(rows, cols, i + 1)
+            sns.scatterplot(data=df[feature], kde=True, bins=30)
+            plt.title(f'Distribution of {feature}')
         plt.tight_layout()
         plt.show()
 
