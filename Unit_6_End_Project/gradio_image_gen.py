@@ -16,24 +16,29 @@ img_resolutions = [{"(328x720) Banner Ad": (328, 720)},
 
 # Clear out the GPU memory before starting
 gc.collect()
-torch.cuda.empty_cache()
+if device == "cuda":
+    torch.cuda.empty_cache()
 
 # Take model and generate an image from prompt, negative prompt, guidance scale, and seed
 def generate_image (prompt, negative_prompt, guidance_scale, resolution, seed):
     # get height and width from img_resolutions based on resolution selected in dropdown
     h, w = [res[resolution] for res in img_resolutions if list(res.keys())[0] == resolution][0]
-    pipe = DiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
+    if device != "cuda":
+        torchType = None        
+    pipe = DiffusionPipeline.from_pretrained(model_id, torch_dtype=torchType, use_safetensors=True, variant="fp16")
     pipe = pipe.to(device)
     pipe.safety_checker = lambda images, **kwargs: (images, [False] * len(images))
     generator = torch.Generator(device).manual_seed(seed)
     pipe.to(device)
-    pipe.enable_model_cpu_offload()
+    if device == "cuda":
+        pipe.enable_model_cpu_offload()
     image = pipe(prompt, negative_prompt=negative_prompt, generator=generator, height=h, width=w, guidance_scale=guidance_scale).images
     
     # Clear out the GPU memory before starting a new image
     # Needed on my machine as it would fill GPU VRAM and then crash after a few runs
     gc.collect()
-    torch.cuda.empty_cache()
+    if device == "cuda":
+        torch.cuda.empty_cache()
     
     return image[0]
 
